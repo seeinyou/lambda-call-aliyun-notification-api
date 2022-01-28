@@ -1,0 +1,24 @@
+{
+    "Records":[
+        {
+            "EventSource":"aws:sns",
+            "EventVersion":"1.0",
+            "EventSubscriptionArn":"arn:aws:sns:ap-southeast-1:123456789012:VPN-tunnle-monitor:53f50ee6-6602-476e-ae85-595acab87492",
+            "Sns":{
+                "Type":"Notification",
+                "MessageId":"9d281a8d-20d6-5eff-bbd0-40ed282e0fe8",
+                "TopicArn":"arn:aws:sns:ap-southeast-1:123456789012:VPN-tunnle-monitor",
+                "Subject":"ALARM: \"vpn-aws-ops-1-status-down\" in Asia Pacific (Singapore)",
+                "Message":"{\"AlarmName\":\"vpn-aws-ops-1-status-down\",\"AlarmDescription\":\"ops-prometheus-suplata-prod down\",\"AWSAccountId\":\"123456789012\",\"NewStateValue\":\"ALARM\",\"NewStateReason\":\"Threshold Crossed: 2 out of the last 2 datapoints [0.0 (28/01/22 03:39:00), 0.0 (28/01/22 03:38:00)] were less than the threshold (1.0) (minimum 2 datapoints for OK -> ALARM transition).\",\"StateChangeTime\":\"2022-01-28T03:40:40.880+0000\",\"Region\":\"Asia Pacific (Singapore)\",\"AlarmArn\":\"arn:aws:cloudwatch:ap-southeast-1:123456789012:alarm:vpn-aws-ops-1-status-down\",\"OldStateValue\":\"OK\",\"Trigger\":{\"MetricName\":\"TunnelState\",\"Namespace\":\"AWS/VPN\",\"StatisticType\":\"Statistic\",\"Statistic\":\"MAXIMUM\",\"Unit\":null,\"Dimensions\":[{\"value\":\"1.1.1.1\",\"name\":\"TunnelIpAddress\"}],\"Period\":60,\"EvaluationPeriods\":2,\"ComparisonOperator\":\"LessThanThreshold\",\"Threshold\":1.0,\"TreatMissingData\":\"missing\",\"EvaluateLowSampleCountPercentile\":\"\"}}",
+                "Timestamp":"2022-01-28T03:40:40.932Z",
+                "SignatureVersion":"1",
+                "Signature":"uCuNY/M4tt2IyjyzjbgnWkYoHftTftoWqSMdkNM6yaA6dRoLy8nqs9kJQai55H1cMHc/9JHqimd+2DwAsp3keLJyirEwpZNZYEQ6e0FW1y814ngIzWX1fzhVP/PMdXUCqiOZkXlQWkG1B4bpip2LnQQCtgg9D0lsJ6+mZl3flyOtqIEY7nzgfsRPFKxtEMpJdzs3Issxri827At669aBmQjdXUj9C8ECsAsJizDeQ8Y7eLhAl2mgsMmd5QBpCTOPv8vGwOnazhUyNstSHLqJFXIRJoMEAGE/1f+At9J/M6CIwIjQZrwnYXWOas1341xrz+FQ7qWySna4WWqjaMRSQw==",
+                "SigningCertUrl":"https://sns.ap-southeast-1.amazonaws.com/SimpleNotificationService-7ff5328490ec283fbaddaa2a969abfda.pem",
+                "UnsubscribeUrl":"https://sns.ap-southeast-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:ap-southeast-1:123456789012:VPN-tunnle-monitor:53f50ee6-6602-476e-ae85-595acab87492",
+                "MessageAttributes":{
+                    
+                }
+            }
+        }
+    ]
+}

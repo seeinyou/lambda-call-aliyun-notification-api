@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-calls-phone-api
+
+  The SAM Template for a Lambda function to call a 3rd-party phone call API when a SNS topic is triggered by a CloudWatch alarm.
+
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  # SNS Topic for triggering Lambda function
+  SnsTopicForCloudWatchAlarm:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: lambda
+          Endpoint: !GetAtt SendPhoneCallNotificationFunction.Arn
+        # - Protocol: email # Uncomment this block for testing purposes.
+        #   Endpoint: admin@example.com
+
+  # The SNS Topic consuming permission
+  TopicConsumerLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref SendPhoneCallNotificationFunction
+      Principal: sns.amazonaws.com
+
+  # An IAM role for the Lambda function
+  LambdaExecutionIamRole:
+    Type: 'AWS::IAM::Role'
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Description: This role allows a Lambda function to record logs to CloudWatch and access KMS.
+      # ManagedPolicyArns: 
+      #   - String
+      Path: '/'
+      Policies: 
+        -
+          PolicyName: lambda-uses-cloudwatch-kms
+          PolicyDocument: # Plese be aware of that the policies below are for demo purposes. You should enhance security for production.
+            Fn::Sub: >
+              {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": "logs:CreateLogGroup",
+                          "Resource": "arn:aws:logs:*:${AWS::AccountId}:*"
+                      },
+                      {
+                          "Effect": "Allow",
+                          "Action": [
+                              "logs:CreateLogStream",
+                              "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                              "arn:aws:logs:*:${AWS::AccountId}:*"
+                          ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                            "secretsmanager:GetResourcePolicy",
+                            "secretsmanager:GetSecretValue",
+                            "secretsmanager:DescribeSecret",
+                            "secretsmanager:ListSecretVersionIds"
+                        ],
+                        "Resource": "arn:aws:secretsmanager:*:${AWS::AccountId}:secret:*"
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "secretsmanager:ListSecrets",
+                        "Resource": "*"
+                    }
+                  ]
+              }
+      RoleName: 'lambda-execution-role-cloudwatch-kms-1'
+      Tags: 
+        - Key: 'Author'
+          Value: 'JM'
+        - Key: 'Creator'
+          Value: 'SAM'
+
+  # A Lambda function to pause the Redshift cluster
+  SendPhoneCallNotificationFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: LambdaExecutionIamRole
+    Properties:
+      CodeUri: src/
+      Handler: lambda-calls-phone-api.lambda_handler
+      Runtime: python3.9
+      Tracing: Active
+      Role: !GetAtt LambdaExecutionIamRole.Arn
+      Architectures:
+        - arm64
+      Environment:
+          Variables: 
+            notify_url : 'https://api.example.com/phone'
+            token_secret_name: 'demo-3rd-party-api-info-1'
+            receivers: 'username' # Putting the receivers into Amazon Secrets Manager is strongly suggested.
+            max_tries: 3
+            wait_secs: 5
+            template: '9'
+            subject: 'Resource failed'
+            body: 'Resource failed'
+      Events:
+        CloudWatchAlarmSNSEvent:
+          Type: SNS
+          Properties:
+            Region: !Ref "AWS::Region"
+            SqsSubscription: false
+            Topic: !Ref SnsTopicForCloudWatchAlarm
+
+Outputs:
+  # The SNS topic
+  CloudWatchAlarmSnsTopic:
+    Description: "The Amazon SNS topic to receive CloudWatch alarm and trigger Lambda functions."
+    Value: !Ref SnsTopicForCloudWatchAlarm
+  PhoneCallFunction:
+    Description: "The Lambda function ARN"
+    Value: !GetAtt SendPhoneCallNotificationFunction.Arn
